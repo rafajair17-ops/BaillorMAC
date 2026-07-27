@@ -35,11 +35,11 @@ app.post('/api/tickets', rateLimit, upload.single('ticket'), async (req, res) =>
     const channel = await client.channels.fetch(process.env.DISCORD_CHANNEL_ID);
     if (!channel?.isTextBased()) return res.status(500).json({ error: 'Canal do Discord inválido.' });
     const attachment = new AttachmentBuilder(req.file.buffer, { name: req.file.originalname || 'ticket-bennys.jpg' });
-    await channel.send({
+    const message = await channel.send({
       content: `🔧 **Novo orçamento — Mecânica Bennys**\nMecânico: \`${data.mechanicId}\` • Cliente: \`${data.clientId}\`\nTotal: **${new Intl.NumberFormat('pt-BR',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(data.total)}**`,
       files: [attachment]
     });
-    res.status(201).json({ ok: true });
+    res.status(201).json({ ok: true, imageUrl: message.attachments.first()?.url || null });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Não foi possível publicar o ticket.' });
